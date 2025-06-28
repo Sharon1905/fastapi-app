@@ -42,13 +42,43 @@ Content-Type: application/json
 GET http://localhost:8000/me
 Authorization: Bearer {{PLAYER_TOKEN}}
 
-### Update my profile
+### Add Dota 2 ID (Steam32)
 PATCH http://localhost:8000/me
-Authorization: Bearer {{PLAYER_TOKEN}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWZkMTIyNzYyZGIyMmNiZGYyYzMyNyIsImVtYWlsIjoidmFsb3JAZXhhbXBsZS5jb20iLCJ1c2VyX3R5cGUiOiJwbGF5ZXIiLCJleHAiOjE3NTEyMDE3NjN9.bHxtmGBkchVxHSC9qM2zW9IZqjBcXCLcc3_HdrCQRBo
 Content-Type: application/json
 
 {
-  "username": "ValorUpdated"
+  "external_ids": {
+    "dota2": "22174"
+  }
+}
+
+### Update full player profile
+PATCH http://localhost:8000/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWZkMTIyNzYyZGIyMmNiZGYyYzMyNyIsImVtYWlsIjoidmFsb3JAZXhhbXBsZS5jb20iLCJ1c2VyX3R5cGUiOiJwbGF5ZXIiLCJleHAiOjE3NTEyMDE3NjN9.bHxtmGBkchVxHSC9qM2zW9IZqjBcXCLcc3_HdrCQRBo
+Content-Type: application/json
+
+{
+  "username": "ValorUpdated",
+  "bio": "Cracked Dota 2 offlaner",
+  "location": "India",
+  "games": ["dota2"],
+  "external_ids": {
+    "dota2": "362859497"
+  }
+}
+
+### Verify Dota 2 Stats
+POST http://localhost:8000/verify-stats
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NWZkMTIyNzYyZGIyMmNiZGYyYzMyNyIsImVtYWlsIjoidmFsb3JAZXhhbXBsZS5jb20iLCJ1c2VyX3R5cGUiOiJwbGF5ZXIiLCJleHAiOjE3NTEyMDE3NjN9.bHxtmGBkchVxHSC9qM2zW9IZqjBcXCLcc3_HdrCQRBo
+Content-Type: application/json
+
+{
+  "game": "dota2",
+  "claimed_stats": {
+    "rank": "66",
+    "kd": 2.38
+  }
 }
 
 ### Post a new gig
@@ -57,19 +87,19 @@ Authorization: Bearer {{ORG_TOKEN}}
 Content-Type: application/json
 
 {
-  "title": "Sniper for Valorant",
-  "description": "We need a cracked sniper!",
+  "title": "Dota 2 Offlaner",
+  "description": "Looking for a smart macro player",
   "location": "India",
-  "tags": ["valorant", "sniper"]
+  "tags": ["dota2", "offlane"]
 }
 
 ### Browse gigs
 GET http://localhost:8000/gigs
 
-### View specific gig
+### View a specific gig
 GET http://localhost:8000/gigs/{{GIG_ID}}
 
-### View my gigs
+### View my gigs (org)
 GET http://localhost:8000/my_gigs
 Authorization: Bearer {{ORG_TOKEN}}
 
@@ -91,16 +121,16 @@ Content-Type: application/json
 {
   "endorsed_id": "{{PLAYER_ID}}",
   "rating": 5,
-  "comment": "Cracked aim 🔥"
+  "comment": "Excellent lane control and rotations!"
 }
 
 ### View player endorsements
 GET http://localhost:8000/endorsements/{{PLAYER_ID}}
 
-### Mint soulbound NFT
+### Mint Soulbound NFT
 POST http://localhost:8000/mint_soulbound_nft?user_id={{PLAYER_ID}}
 
-### View minted NFT
+### View player's NFT
 GET http://localhost:8000/nft/{{PLAYER_ID}}
 
 ### Admin stats

@@ -11,6 +11,7 @@ class UserCreate(BaseModel):
     location: Optional[str] = None
     socials: Optional[dict] = None  # like {"twitter": "...", "twitch": "..."}
     games: Optional[list[str]] = None
+    external_ids: Optional[dict] = None  # e.g., {"valorant": "riot_id", "dota2": "steam_id"}
 
 class UserOut(BaseModel):
     id: str
@@ -21,6 +22,8 @@ class UserOut(BaseModel):
     location: Optional[str] = None
     socials: Optional[dict] = None
     games: Optional[list[str]] = None
+    external_ids: Optional[dict] = None  # e.g., {"valorant": "riot_id", "dota2": "steam_id"}
+    is_verified: Optional[bool] = False
 
 class UserUpdate(BaseModel):
     username: Optional[str] = None
@@ -28,6 +31,7 @@ class UserUpdate(BaseModel):
     location: Optional[str] = None
     socials: Optional[dict] = None
     games: Optional[list[str]] = None
+    external_ids: Optional[dict] = None  # e.g., {"valorant": "riot_id", "dota2": "steam_id"}
 
 class UserLogin(BaseModel):
     email: EmailStr

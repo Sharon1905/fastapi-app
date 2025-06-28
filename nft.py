@@ -45,9 +45,14 @@ async def mint_nft(user_id: str = Query(...)):
     # Simulate NFT metadata
     nft_data = {
         "user_id": user_id,
-        "name": user["name"],
+        "username": user["username"],
         "reputation": reputation,
-        "minted_at": str(ObjectId().generation_time)
+        "minted_at": str(ObjectId().generation_time),
+        "metadata": {
+        "games": user.get("games", []),
+        "bio": user.get("bio", ""),
+        "location": user.get("location", "")
+        }
     }
 
     await db["soulbound_nfts"].insert_one(nft_data)

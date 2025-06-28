@@ -16,11 +16,40 @@ async def endorse_user(endorsement: EndorsementCreate, current_user: dict = Depe
     if current_user["user_type"] != "org":
         raise HTTPException(status_code=403, detail="Only organizations can endorse players.")
 
+    # ✅ Make sure the player exists
+    endorsed_id = endorsement.endorsed_id
+    player = await db["users"].find_one({"_id": ObjectId(endorsed_id), "user_type": "player"})
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found.")
+
+    # ✅ Insert the endorsement
     endorse_dict = endorsement.model_dump()
     endorse_dict["endorsed_by"] = current_user["id"]
-    endorse_dict["created_at"] = datetime.utcnow()  # ✅ Timestamp for filtering
-    new_endorse = await db["endorsements"].insert_one(endorse_dict)
-    return {"id": str(new_endorse.inserted_id)}
+    endorse_dict["created_at"] = datetime.utcnow()
+    await db["endorsements"].insert_one(endorse_dict)
+
+    # ✅ Recalculate ratings
+    all_endorsements = db["endorsements"].find({"endorsed_id": endorsed_id})
+    ratings = [e["rating"] async for e in all_endorsements]
+
+    avg_rating = round(sum(ratings) / len(ratings), 2)
+    count = len(ratings)
+    trusted = avg_rating >= 4.5 and count >= 3
+
+    await db["users"].update_one(
+        {"_id": ObjectId(endorsed_id)},
+        {"$set": {
+            "avg_rating": avg_rating,
+            "endorsement_count": count,
+            "trusted": trusted
+        }}
+    )
+
+    return {
+        "message": "Endorsement added successfully",
+        "avg_rating": avg_rating,
+        "endorsement_count": count
+    }
 
 # ANYONE: View endorsements of a user (usually player)
 @router.get("/endorsements/{user_id}")
@@ -33,8 +62,8 @@ async def view_endorsements(
     max_rating: int = Query(None),
     created_before: str = Query(None),
     created_after: str = Query(None),
-    sort_by: str = Query("created_at"),  # default sorting
-    order: str = Query("desc")           # asc or desc
+    sort_by: str = Query("created_at"),
+    order: str = Query("desc")
 ):
     if page < 1 or limit < 1:
         raise HTTPException(status_code=400, detail="Page and limit must be positive integers.")
@@ -50,9 +79,8 @@ async def view_endorsements(
     if created_before:
         query_filter["created_at"] = {"$lte": datetime.fromisoformat(created_before)}
     if created_after:
-        query_filter.setdefault("created_at", {})["$gte"] = datetime.fromisoformat(created_after)
+        query_filter.setdefault("created_at", {})["$gte": datetime.fromisoformat(created_after)]
 
-    # 🧠 Determine sorting field and order
     allowed_sort_fields = {"created_at", "rating"}
     if sort_by not in allowed_sort_fields:
         raise HTTPException(status_code=400, detail=f"Invalid sort field: {sort_by}")

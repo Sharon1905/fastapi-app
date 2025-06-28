@@ -1,9 +1,15 @@
 def user_helper(user) -> dict:
     return {
         "id": str(user["_id"]),
-        "username": user["username"],
-        "email": user["email"],
-        "user_type": user["user_type"]
+        "username": user.get("username"),
+        "email": user.get("email"),
+        "user_type": user.get("user_type"),
+        "bio": user.get("bio"),
+        "location": user.get("location"),
+        "socials": user.get("socials"),
+        "games": user.get("games"),
+        "external_ids": user.get("external_ids"),
+        "is_verified": user.get("is_verified", False)
     }
 
 def gig_helper(gig):
